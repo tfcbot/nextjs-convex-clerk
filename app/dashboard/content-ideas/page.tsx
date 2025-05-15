@@ -5,13 +5,11 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Id } from "../../../convex/_generated/dataModel";
 
 export default function ContentIdeasPage() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showPremiumOnly, setShowPremiumOnly] = useState(false);
@@ -266,4 +264,3 @@ export default function ContentIdeasPage() {
     </div>
   );
 }
-

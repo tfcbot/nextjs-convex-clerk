@@ -1,12 +1,13 @@
 "use client";
 
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useConvexAuth } from "convex/react";
 import { useEffect, useState } from "react";
 import { api } from "../../convex/_generated/api";
 import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -126,10 +127,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {channels.map((channel) => (
               <div key={channel._id} className="flex items-center p-4 border border-gray-100 rounded-lg">
-                <img 
+                <Image 
                   src={channel.thumbnailUrl || "https://placehold.co/100/e2e8f0/475569?text=Channel"} 
                   alt={channel.channelName} 
                   className="w-12 h-12 rounded-full mr-4"
+                  width={48}
+                  height={48}
                 />
                 <div>
                   <h3 className="font-medium">{channel.channelName}</h3>
@@ -269,3 +272,29 @@ function StatCard({ title, value, description }: { title: string; value: string;
   );
 }
 
+function TestimonialCard({ quote, author, role, avatar }: { quote: string; author: string; role: string; avatar: string }) {
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+      <p className="text-gray-700 mb-4 italic">&quot;{quote}&quot;</p>
+      <div className="flex items-center">
+        <Image 
+          src={avatar} 
+          alt={author} 
+          className="w-10 h-10 rounded-full mr-3"
+          width={40}
+          height={40}
+          onError={(e) => {
+            // TypeScript doesn't allow direct assignment to currentTarget.src
+            // Using a type assertion to work around this
+            const target = e.currentTarget as HTMLImageElement;
+            target.src = "https://placehold.co/100/e2e8f0/475569?text=User";
+          }}
+        />
+        <div>
+          <p className="font-medium">{author}</p>
+          <p className="text-gray-500 text-sm">{role}</p>
+        </div>
+      </div>
+    </div>
+  );
+}

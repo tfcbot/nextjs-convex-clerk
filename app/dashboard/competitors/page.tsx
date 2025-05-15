@@ -5,18 +5,16 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Id } from "../../../convex/_generated/dataModel";
 
 export default function CompetitorsPage() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
-  const router = useRouter();
   const [competitorUrl, setCompetitorUrl] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [error, setError] = useState("");
   const [selectedCompetitor, setSelectedCompetitor] = useState<Id<"competitors"> | null>(null);
-  const [insights, setInsights] = useState<any | null>(null);
+  const [insights, setInsights] = useState<Record<string, unknown> | null>(null);
   const [isLoadingInsights, setIsLoadingInsights] = useState(false);
   
   // Get user data from Convex
@@ -271,7 +269,7 @@ export default function CompetitorsPage() {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-gray-500 mb-4">Click "Generate Insights" to analyze this competitor</p>
+                  <p className="text-gray-500 mb-4">Click &quot;Generate Insights&quot; to analyze this competitor</p>
                   <button
                     onClick={() => handleGenerateInsights(selectedCompetitor)}
                     className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -298,4 +296,3 @@ export default function CompetitorsPage() {
     </div>
   );
 }
-

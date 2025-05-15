@@ -14,7 +14,7 @@ export default function PricingPage() {
   const updatePremiumStatus = useMutation(api.users.updatePremiumStatus);
 
   // For demo purposes, we'll simulate upgrading to premium
-  const handleUpgrade = async (plan: string) => {
+  const handleUpgrade = async () => {
     if (!isSignedIn || !user) {
       router.push("/sign-in");
       return;
@@ -104,7 +104,7 @@ export default function PricingPage() {
           </ul>
           
           <button
-            onClick={() => handleUpgrade("pro")}
+            onClick={() => handleUpgrade()}
             disabled={isUpdating}
             className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
           >
@@ -134,7 +134,7 @@ export default function PricingPage() {
           </ul>
           
           <button
-            onClick={() => handleUpgrade("premium")}
+            onClick={() => handleUpgrade()}
             disabled={isUpdating}
             className="w-full py-2 px-4 bg-gray-800 text-white rounded-md hover:bg-gray-900 transition-colors disabled:opacity-50"
           >
@@ -221,4 +221,3 @@ function FaqItem({ question, answer }: { question: string; answer: string }) {
     </div>
   );
 }
-

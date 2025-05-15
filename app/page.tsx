@@ -1,9 +1,10 @@
 "use client";
 
-import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs";
+import { SignUpButton, useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Image from "next/image";
 
 export default function LandingPage() {
   const { isSignedIn } = useAuth();
@@ -44,12 +45,15 @@ export default function LandingPage() {
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-25"></div>
                 <div className="relative bg-white p-6 rounded-lg shadow-xl">
-                  <img 
+                  <Image 
                     src="/youtube-planner-hero.png" 
                     alt="YouTube Planner Dashboard" 
                     className="rounded-md shadow-sm"
+                    width={600}
+                    height={400}
                     onError={(e) => {
-                      e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/475569?text=YouTube+Planner";
+                      const target = e.currentTarget as HTMLImageElement;
+                      target.src = "https://placehold.co/600x400/e2e8f0/475569?text=YouTube+Planner";
                     }}
                   />
                 </div>
@@ -193,14 +197,17 @@ function PremiumFeatureCard({ title, description }: { title: string; description
 function TestimonialCard({ quote, author, role, avatar }: { quote: string; author: string; role: string; avatar: string }) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <p className="text-gray-700 mb-4 italic">"{quote}"</p>
+      <p className="text-gray-700 mb-4 italic">&quot;{quote}&quot;</p>
       <div className="flex items-center">
-        <img 
+        <Image 
           src={avatar} 
           alt={author} 
           className="w-10 h-10 rounded-full mr-3"
+          width={40}
+          height={40}
           onError={(e) => {
-            e.currentTarget.src = "https://placehold.co/100/e2e8f0/475569?text=User";
+            const target = e.currentTarget as HTMLImageElement;
+            target.src = "https://placehold.co/100/e2e8f0/475569?text=User";
           }}
         />
         <div>
@@ -211,4 +218,3 @@ function TestimonialCard({ quote, author, role, avatar }: { quote: string; autho
     </div>
   );
 }
-
