@@ -13,7 +13,12 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as competitors from "../competitors.js";
+import type * as contentIdeas from "../contentIdeas.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as trendingTopics from "../trendingTopics.js";
+import type * as users from "../users.js";
+import type * as youtubeApi from "../youtubeApi.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -24,7 +29,12 @@ import type * as myFunctions from "../myFunctions.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  competitors: typeof competitors;
+  contentIdeas: typeof contentIdeas;
   myFunctions: typeof myFunctions;
+  trendingTopics: typeof trendingTopics;
+  users: typeof users;
+  youtubeApi: typeof youtubeApi;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

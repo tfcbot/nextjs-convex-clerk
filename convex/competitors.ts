@@ -2,6 +2,32 @@ import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import { ActionCtx } from "./_generated/server";
+
+// Define type for competitor insights return
+interface CompetitorInsights {
+  topPerformingContentTypes: string[];
+  uploadFrequency: string;
+  averageViewCount: number;
+  engagementRate: string;
+  growthRate: string;
+  recommendedStrategies: string[];
+}
+
+// Competitor document structure
+interface CompetitorDoc {
+  _id: Id<"competitors">;
+  userId: string;
+  competitorChannelId: string;
+  competitorName: string;
+  competitorUrl: string;
+  subscriberCount: number;
+  videoCount: number;
+  viewCount: number;
+  lastSyncedAt: number;
+  notes: string;
+  isPremium: boolean;
+}
 
 // Add a competitor to analyze
 export const addCompetitor = action({
@@ -9,7 +35,7 @@ export const addCompetitor = action({
     userId: v.string(),
     competitorUrl: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: ActionCtx, args): Promise<Id<"competitors">> => {
     // Check if user is premium
     const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     const isPremium = user?.isPremium || false;
@@ -37,7 +63,8 @@ export const addCompetitor = action({
       competitorData,
     });
     
-    return competitorId;
+    // The storeCompetitorData mutation always returns a valid ID or throws an error
+    return competitorId as Id<"competitors">;
   },
 });
 
@@ -146,7 +173,7 @@ export const generateCompetitorInsights = action({
     userId: v.string(),
     competitorId: v.id("competitors"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: ActionCtx, args): Promise<CompetitorInsights> => {
     // Check if user is premium
     const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     const isPremium = user?.isPremium || false;
@@ -155,7 +182,7 @@ export const generateCompetitorInsights = action({
       throw new Error("Competitor insights is a premium feature");
     }
     
-    const competitor = await ctx.db.get(args.competitorId);
+    const competitor = await ctx.runQuery(api.competitors.getCompetitorById, { competitorId: args.competitorId });
     if (!competitor) {
       throw new Error("Competitor not found");
     }
@@ -165,7 +192,7 @@ export const generateCompetitorInsights = action({
     return {
       topPerformingContentTypes: ["Tutorials", "Reviews", "Interviews"],
       uploadFrequency: "2 videos per week",
-      averageViewCount: Math.floor(competitor.viewCount / (competitor.videoCount || 1)),
+      averageViewCount: Math.floor((competitor.viewCount || 0) / (competitor.videoCount || 1)),
       engagementRate: `${(Math.random() * 10).toFixed(2)}%`,
       growthRate: `${(Math.random() * 20).toFixed(2)}% per month`,
       recommendedStrategies: [
@@ -174,5 +201,15 @@ export const generateCompetitorInsights = action({
         "Engage more with comments to boost engagement rate",
       ],
     };
+  },
+});
+
+// Add helper query to get competitor by ID
+export const getCompetitorById = query({
+  args: {
+    competitorId: v.id("competitors"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.competitorId);
   },
 });

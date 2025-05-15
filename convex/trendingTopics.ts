@@ -2,13 +2,14 @@ import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import { ActionCtx } from "./_generated/server";
 
 // Generate trending topics for content ideas
 export const generateTrendingTopics = action({
   args: {
     userId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: ActionCtx, args): Promise<Id<"trendingTopics">[]> => {
     // Check if user exists
     const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     if (!user) {
@@ -53,11 +54,18 @@ export const generateTrendingTopics = action({
     ];
     
     // Store topics in the database
-    const topicIds = [];
+    const topicIds: Id<"trendingTopics">[] = [];
     for (const topic of trendingTopics) {
-      const topicId = await ctx.runMutation(api.trendingTopics.storeTrendingTopic, {
+      const topicId: Id<"trendingTopics"> = await ctx.runMutation(api.trendingTopics.storeTrendingTopic, {
         userId: args.userId,
-        topic,
+        topicData: {
+          topic: topic.title,
+          description: topic.description,
+          relevanceScore: topic.relevanceScore,
+          createdAt: Date.now(),
+          isPremium: topic.isPremium,
+          sources: [],
+        }
       });
       topicIds.push(topicId);
     }

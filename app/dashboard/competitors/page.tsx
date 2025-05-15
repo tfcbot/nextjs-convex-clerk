@@ -120,7 +120,7 @@ export default function CompetitorsPage() {
           <div className="text-5xl mb-4">🔒</div>
           <h2 className="text-2xl font-semibold mb-4">Premium Feature</h2>
           <p className="text-gray-600 mb-6 max-w-lg mx-auto">
-            Competitor analysis is a premium feature. Upgrade to analyze what's working for similar channels 
+            Competitor analysis is a premium feature. Upgrade to analyze what&apos;s working for similar channels 
             and get insights to help you stand out.
           </p>
           <Link 

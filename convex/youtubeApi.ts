@@ -1,7 +1,8 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
+import { ActionCtx } from "./_generated/server";
 
 // Mock function to simulate fetching YouTube channel data
 // In a real implementation, this would use the YouTube API
@@ -10,47 +11,47 @@ export const connectYouTubeChannel = action({
     channelUrl: v.string(),
     userId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: ActionCtx, args): Promise<Id<"youtubeChannels">> => {
     // Extract channel ID from URL (simplified for demo)
-    const channelId = args.channelUrl.split("/").pop() || "demo-channel-id";
+    const youtubeChannelId = args.channelUrl.split("/").pop() || "demo-channel-id";
     
     // Simulate API call to get channel data
     const channelData = {
-      channelId,
-      channelName: `Channel ${channelId}`,
+      channelId: youtubeChannelId,
+      channelName: `Channel ${youtubeChannelId}`,
       channelUrl: args.channelUrl,
       subscriberCount: Math.floor(Math.random() * 100000),
       videoCount: Math.floor(Math.random() * 500),
       viewCount: Math.floor(Math.random() * 10000000),
-      thumbnailUrl: `https://picsum.photos/seed/${channelId}/200/200`,
+      thumbnailUrl: `https://picsum.photos/seed/${youtubeChannelId}/200/200`,
     };
     
     // Store channel data in the database
-    const channelId = await ctx.runMutation(internal.youtubeApi.storeChannelData, {
+    const dbChannelId = (await ctx.runMutation(api.youtubeApi.storeChannelData, {
       userId: args.userId,
       channelData,
-    });
+    })) as Id<"youtubeChannels">;
     
     // Simulate fetching videos (in a real app, would paginate through all videos)
     const videos = Array.from({ length: 5 }, (_, i) => ({
-      videoId: `video-${i}-${channelId}`,
+      videoId: `video-${i}-${youtubeChannelId}`,
       title: `Sample Video ${i}`,
       description: `This is a sample video description for video ${i}`,
       publishedAt: Date.now() - i * 86400000, // each video 1 day apart
       viewCount: Math.floor(Math.random() * 50000),
       likeCount: Math.floor(Math.random() * 5000),
       commentCount: Math.floor(Math.random() * 500),
-      thumbnailUrl: `https://picsum.photos/seed/video-${i}-${channelId}/320/180`,
+      thumbnailUrl: `https://picsum.photos/seed/video-${i}-${youtubeChannelId}/320/180`,
       tags: ["sample", "video", `tag-${i}`],
     }));
     
     // Store videos in the database
-    await ctx.runMutation(internal.youtubeApi.storeVideos, {
-      channelId,
+    await ctx.runMutation(api.youtubeApi.storeVideos, {
+      channelId: dbChannelId,
       videos,
     });
     
-    return channelId;
+    return dbChannelId;
   },
 });
 

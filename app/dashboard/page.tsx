@@ -8,6 +8,23 @@ import { useMutation, useQuery } from "convex/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Id } from "../../convex/_generated/dataModel";
+
+// Define types for contentIdeas and trendingTopics
+interface ContentIdea {
+  _id: Id<"contentIdeas">;
+  title: string;
+  description: string;
+  isPremium: boolean;
+  tags?: string[];
+}
+
+interface TrendingTopic {
+  _id: Id<"trendingTopics">;
+  topic: string;
+  description?: string;
+  isPremium: boolean;
+}
 
 export default function DashboardPage() {
   const { isAuthenticated, isLoading } = useConvexAuth();
@@ -169,7 +186,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="space-y-4">
-            {contentIdeas.slice(0, 3).map((idea) => (
+            {contentIdeas.slice(0, 3).map((idea: ContentIdea) => (
               <div key={idea._id} className="p-4 border border-gray-100 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium">{idea.title}</h3>
@@ -182,7 +199,7 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-600 mb-2">{idea.description}</p>
                 {idea.tags && idea.tags.length > 0 && (
                   <div className="flex flex-wrap gap-1">
-                    {idea.tags.map((tag, index) => (
+                    {idea.tags.map((tag: string, index: number) => (
                       <span key={index} className="bg-gray-100 text-gray-800 text-xs px-2 py-0.5 rounded">
                         {tag}
                       </span>
@@ -226,7 +243,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {trendingTopics.slice(0, 4).map((topic) => (
+            {trendingTopics.slice(0, 4).map((topic: TrendingTopic) => (
               <div key={topic._id} className="p-4 border border-gray-100 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-medium">{topic.topic}</h3>
@@ -272,29 +289,4 @@ function StatCard({ title, value, description }: { title: string; value: string;
   );
 }
 
-function TestimonialCard({ quote, author, role, avatar }: { quote: string; author: string; role: string; avatar: string }) {
-  return (
-    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <p className="text-gray-700 mb-4 italic">&quot;{quote}&quot;</p>
-      <div className="flex items-center">
-        <Image 
-          src={avatar} 
-          alt={author} 
-          className="w-10 h-10 rounded-full mr-3"
-          width={40}
-          height={40}
-          onError={(e) => {
-            // TypeScript doesn't allow direct assignment to currentTarget.src
-            // Using a type assertion to work around this
-            const target = e.currentTarget as HTMLImageElement;
-            target.src = "https://placehold.co/100/e2e8f0/475569?text=User";
-          }}
-        />
-        <div>
-          <p className="font-medium">{author}</p>
-          <p className="text-gray-500 text-sm">{role}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+

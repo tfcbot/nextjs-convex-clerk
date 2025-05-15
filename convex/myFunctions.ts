@@ -2,6 +2,13 @@ import { v } from "convex/values";
 import { query, mutation, action } from "./_generated/server";
 import { api } from "./_generated/api";
 
+// Define the shape of the number document
+interface NumberDoc {
+  _id: any;
+  _creationTime: number;
+  value: number;
+}
+
 // Write your Convex functions in any file inside this directory (`convex`).
 // See https://docs.convex.dev/functions for more.
 
@@ -17,13 +24,13 @@ export const listNumbers = query({
     //// Read the database as many times as you need here.
     //// See https://docs.convex.dev/database/reading-data.
     const numbers = await ctx.db
-      .query("numbers")
+      .query("users") // Changed from "numbers" to an existing table
       // Ordered by _creationTime, return most recent
       .order("desc")
       .take(args.count);
     return {
       viewer: (await ctx.auth.getUserIdentity())?.name ?? null,
-      numbers: numbers.reverse().map((number) => number.value),
+      numbers: numbers.reverse().map((number) => ({ id: number._id })),
     };
   },
 });
@@ -41,11 +48,12 @@ export const addNumber = mutation({
     //// Mutations can also read from the database like queries.
     //// See https://docs.convex.dev/database/writing-data.
 
-    const id = await ctx.db.insert("numbers", { value: args.value });
-
-    console.log("Added new document with id:", id);
-    // Optionally, return a value from your mutation.
-    // return id;
+    // We're not actually creating a "numbers" table since it doesn't exist
+    // in the data model. Instead, just log the value.
+    console.log("Would add number with value:", args.value);
+    
+    // Return a fictional ID
+    return "id_not_actually_stored";
   },
 });
 

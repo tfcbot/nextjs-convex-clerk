@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
 import { api } from "./_generated/api";
+import { ActionCtx } from "./_generated/server";
 
 // Generate content ideas based on user's channel
 export const generateContentIdeas = action({
@@ -9,7 +10,7 @@ export const generateContentIdeas = action({
     userId: v.string(),
     channelId: v.optional(v.string()),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx: ActionCtx, args): Promise<Id<"contentIdeas">[]> => {
     // Check if user exists
     const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     if (!user) {
@@ -20,10 +21,16 @@ export const generateContentIdeas = action({
     const channels = await ctx.runQuery(api.youtubeApi.getUserChannels, { userId: args.userId });
     
     // Use provided channel ID or default to first channel
-    const channelId = args.channelId || (channels.length > 0 ? channels[0].id : "demo-channel");
+    // Get channel ID or use a default
+    let channelIdToUse = "demo-channel";
+    if (args.channelId) {
+      channelIdToUse = args.channelId;
+    } else if (channels.length > 0 && channels[0].channelId) {
+      channelIdToUse = channels[0].channelId;
+    }
     
     // Get recent videos to analyze content preferences
-    const videos = await ctx.runQuery(api.youtubeApi.getChannelVideos, { channelId: args.channelId });
+    const videos = await ctx.runQuery(api.youtubeApi.getChannelVideos, { channelId: channelIdToUse });
     
     // In a real implementation, this would analyze the channel's content
     // and generate personalized ideas
@@ -63,11 +70,19 @@ export const generateContentIdeas = action({
     ];
     
     // Store ideas in the database
-    const ideaIds = [];
+    const ideaIds: Id<"contentIdeas">[] = [];
     for (const idea of contentIdeas) {
-      const ideaId = await ctx.runMutation(api.contentIdeas.storeContentIdea, {
+      const ideaId: Id<"contentIdeas"> = await ctx.runMutation(api.contentIdeas.storeContentIdea, {
         userId: args.userId,
-        idea,
+        idea: {
+          userId: args.userId,
+          title: idea.title,
+          description: idea.description,
+          tags: idea.tags,
+          createdAt: Date.now(),
+          isGenerated: true,
+          isPremium: idea.isPremium,
+        },
       });
       ideaIds.push(ideaId);
     }
@@ -79,6 +94,7 @@ export const generateContentIdeas = action({
 // Store a content idea in the database
 export const storeContentIdea = mutation({
   args: {
+    userId: v.string(),
     idea: v.object({
       userId: v.string(),
       title: v.string(),
