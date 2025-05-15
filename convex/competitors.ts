@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 // Add a competitor to analyze
 export const addCompetitor = action({
@@ -10,7 +11,7 @@ export const addCompetitor = action({
   },
   handler: async (ctx, args) => {
     // Check if user is premium
-    const user = await ctx.runQuery("users:getUserById", { userId: args.userId });
+    const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     const isPremium = user?.isPremium || false;
     
     if (!isPremium) {
@@ -31,7 +32,7 @@ export const addCompetitor = action({
     };
     
     // Store competitor data
-    const competitorId = await ctx.runMutation("competitors:storeCompetitorData", {
+    const competitorId = await ctx.runMutation(api.competitors.storeCompetitorData, {
       userId: args.userId,
       competitorData,
     });
@@ -147,7 +148,7 @@ export const generateCompetitorInsights = action({
   },
   handler: async (ctx, args) => {
     // Check if user is premium
-    const user = await ctx.runQuery("users:getUserById", { userId: args.userId });
+    const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
     const isPremium = user?.isPremium || false;
     
     if (!isPremium) {
@@ -175,4 +176,3 @@ export const generateCompetitorInsights = action({
     };
   },
 });
-

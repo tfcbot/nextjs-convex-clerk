@@ -1,92 +1,63 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
-// Generate trending topics in the user's niche
+// Generate trending topics for content ideas
 export const generateTrendingTopics = action({
   args: {
     userId: v.string(),
-    niche: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Check if user is premium
-    const user = await ctx.runQuery("users:getUserById", { userId: args.userId });
-    const isPremium = user?.isPremium || false;
-    
-    // In a real implementation, this would use an AI service or trend API
-    // to find trending topics in the user's niche
-    // For this demo, we'll generate mock trending topics
-    
-    const basicTopics = [
-      {
-        topic: "Content Creation Tips",
-        description: "Best practices for creating engaging YouTube content",
-        relevanceScore: 85,
-        sources: ["YouTube Trends", "Creator Insights"],
-        isPremium: false,
-      },
-      {
-        topic: "YouTube Algorithm Updates",
-        description: "Recent changes to the YouTube recommendation algorithm",
-        relevanceScore: 90,
-        sources: ["YouTube Blog", "Creator Insider"],
-        isPremium: false,
-      },
-      {
-        topic: "Video Editing Techniques",
-        description: "Popular editing styles and techniques for YouTube",
-        relevanceScore: 75,
-        sources: ["Creator Forums", "Editing Communities"],
-        isPremium: false,
-      },
-    ];
-    
-    const premiumTopics = [
-      {
-        topic: "Emerging Content Niches",
-        description: "Undiscovered content categories with high growth potential",
-        relevanceScore: 95,
-        sources: ["Trend Analysis", "Market Research"],
-        isPremium: true,
-      },
-      {
-        topic: "Monetization Strategies",
-        description: "Advanced techniques for maximizing revenue from your content",
-        relevanceScore: 88,
-        sources: ["Creator Economy Reports", "Platform Insights"],
-        isPremium: true,
-      },
-      {
-        topic: "Audience Retention Tactics",
-        description: "Proven methods to keep viewers watching longer",
-        relevanceScore: 92,
-        sources: ["Analytics Research", "Engagement Studies"],
-        isPremium: true,
-      },
-      {
-        topic: "Cross-Platform Growth",
-        description: "Strategies for leveraging multiple platforms to grow your audience",
-        relevanceScore: 87,
-        sources: ["Social Media Trends", "Creator Case Studies"],
-        isPremium: true,
-      },
-    ];
-    
-    // Combine topics based on premium status
-    const topics = [...basicTopics];
-    if (isPremium) {
-      topics.push(...premiumTopics);
+    // Check if user exists
+    const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
+    if (!user) {
+      throw new Error("User not found");
     }
+    
+    // In a real implementation, this would fetch trending topics from YouTube API
+    // and analyze them for relevance to the user's channel
+    // For this demo, we'll return mock trending topics
+    
+    const trendingTopics = [
+      {
+        title: "AI Tools for Content Creators",
+        description: "Explore how AI is transforming content creation workflows",
+        relevanceScore: 95,
+        isPremium: false,
+      },
+      {
+        title: "Short-form vs Long-form Content Strategy",
+        description: "Analyze the pros and cons of different content formats",
+        relevanceScore: 87,
+        isPremium: false,
+      },
+      {
+        title: "Monetization Beyond AdSense",
+        description: "Explore alternative revenue streams for creators",
+        relevanceScore: 92,
+        isPremium: true,
+      },
+      {
+        title: "Collaboration Strategies for Channel Growth",
+        description: "How to find and work with other creators for mutual benefit",
+        relevanceScore: 84,
+        isPremium: false,
+      },
+      {
+        title: "Content Repurposing Workflows",
+        description: "Maximize your content's reach across multiple platforms",
+        relevanceScore: 89,
+        isPremium: true,
+      },
+    ];
     
     // Store topics in the database
     const topicIds = [];
-    for (const topicData of topics) {
-      const topicId = await ctx.runMutation("trendingTopics:storeTrendingTopic", {
+    for (const topic of trendingTopics) {
+      const topicId = await ctx.runMutation(api.trendingTopics.storeTrendingTopic, {
         userId: args.userId,
-        topicData: {
-          ...topicData,
-          createdAt: Date.now(),
-        },
+        topic,
       });
       topicIds.push(topicId);
     }
@@ -148,4 +119,3 @@ export const getUserTrendingTopics = query({
     return await query.collect();
   },
 });
-

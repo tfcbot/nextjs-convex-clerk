@@ -1,63 +1,74 @@
 import { v } from "convex/values";
 import { action, mutation, query } from "./_generated/server";
 import { Id } from "./_generated/dataModel";
+import { api } from "./_generated/api";
 
 // Generate content ideas based on user's channel
 export const generateContentIdeas = action({
   args: {
     userId: v.string(),
-    channelId: v.string(),
-    count: v.number(),
+    channelId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Check if user is premium
-    const user = await ctx.runQuery("users:getUserById", { userId: args.userId });
-    const isPremium = user?.isPremium || false;
-    
-    // Get channel data
-    const channels = await ctx.runQuery("youtubeApi:getUserChannels", { userId: args.userId });
-    const channel = channels.find(c => c.channelId === args.channelId);
-    
-    if (!channel) {
-      throw new Error("Channel not found");
+    // Check if user exists
+    const user = await ctx.runQuery(api.users.getUserById, { userId: args.userId });
+    if (!user) {
+      throw new Error("User not found");
     }
     
-    // Get videos to analyze
-    const videos = await ctx.runQuery("youtubeApi:getChannelVideos", { channelId: args.channelId });
+    // Get user's YouTube channels
+    const channels = await ctx.runQuery(api.youtubeApi.getUserChannels, { userId: args.userId });
     
-    // In a real implementation, this would use an AI service to analyze videos and generate ideas
-    // For this demo, we'll generate mock ideas
-    const ideas = [];
-    const categories = ["Tutorial", "Review", "Vlog", "Commentary", "Interview", "Reaction"];
-    const estimatedViewership = ["high", "medium", "low"];
+    // Use provided channel ID or default to first channel
+    const channelId = args.channelId || (channels.length > 0 ? channels[0].id : "demo-channel");
     
-    // Generate different ideas based on premium status
-    const ideaCount = isPremium ? args.count : Math.min(args.count, 3); // Limit for free users
+    // Get recent videos to analyze content preferences
+    const videos = await ctx.runQuery(api.youtubeApi.getChannelVideos, { channelId: args.channelId });
     
-    for (let i = 0; i < ideaCount; i++) {
-      const isPremiumIdea = i >= 3; // First 3 ideas are free, rest are premium
-      
-      const idea = {
-        userId: args.userId,
-        title: `Content Idea ${i + 1}: ${getRandomElement(categories)}`,
-        description: `This is a ${isPremiumIdea ? 'premium' : 'free'} content idea generated based on your channel analytics. It's designed to engage your audience and grow your channel.`,
-        tags: ["youtube", "content", getRandomElement(categories).toLowerCase()],
-        createdAt: Date.now(),
-        isGenerated: true,
-        inspirationSources: videos.slice(0, 2).map(v => v.videoId),
-        isPremium: isPremiumIdea,
-        category: getRandomElement(categories),
-        potentialKeywords: ["youtube", "creator", "content", getRandomElement(categories).toLowerCase()],
-        estimatedViewership: getRandomElement(estimatedViewership),
-      };
-      
-      ideas.push(idea);
-    }
+    // In a real implementation, this would analyze the channel's content
+    // and generate personalized ideas
+    // For this demo, we'll return mock ideas
+    
+    const contentIdeas = [
+      {
+        title: "10 Advanced Tips for YouTube Growth in 2023",
+        description: "Share advanced strategies that have worked for your channel",
+        tags: ["growth", "strategy", "tips"],
+        isPremium: false,
+      },
+      {
+        title: "How I Gained 10K Subscribers in 30 Days",
+        description: "Share your journey and specific tactics that led to subscriber growth",
+        tags: ["growth", "case study", "subscribers"],
+        isPremium: false,
+      },
+      {
+        title: "YouTube Algorithm: What Changed in 2023",
+        description: "Analyze recent algorithm changes and how creators should adapt",
+        tags: ["algorithm", "strategy", "analysis"],
+        isPremium: true,
+      },
+      {
+        title: "Content Calendar Planning for YouTube Success",
+        description: "Show how to plan content strategically for maximum impact",
+        tags: ["planning", "strategy", "organization"],
+        isPremium: false,
+      },
+      {
+        title: "Competitor Analysis: What Top Creators Do Differently",
+        description: "Analyze successful channels in your niche and extract lessons",
+        tags: ["analysis", "competition", "strategy"],
+        isPremium: true,
+      },
+    ];
     
     // Store ideas in the database
     const ideaIds = [];
-    for (const idea of ideas) {
-      const ideaId = await ctx.runMutation("contentIdeas:storeContentIdea", { idea });
+    for (const idea of contentIdeas) {
+      const ideaId = await ctx.runMutation(api.contentIdeas.storeContentIdea, {
+        userId: args.userId,
+        idea,
+      });
       ideaIds.push(ideaId);
     }
     
@@ -153,4 +164,3 @@ export const deleteContentIdea = mutation({
 function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
-
