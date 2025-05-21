@@ -98,6 +98,8 @@ npm run dev
 
 ## Deployment
 
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Ftfcbot%2Fnextjs-convex-clerk&env=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,CLERK_SECRET_KEY,CLERK_JWT_ISSUER_DOMAIN,NEXT_PUBLIC_CONVEX_URL&envDescription=API%20keys%20needed%20for%20authentication%20and%20backend%20functionality&envLink=https%3A%2F%2Fgithub.com%2Ftfcbot%2Fnextjs-convex-clerk%23getting-started)
+
 ### Deploying to Vercel
 
 1. Push your code to a GitHub repository
@@ -122,4 +124,3 @@ npm run dev
 - [Convex Discord](https://convex.dev/community)
 - [Next.js Discord](https://discord.gg/nextjs)
 - [Clerk Discord](https://clerk.com/discord)
-
