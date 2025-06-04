@@ -6,7 +6,8 @@ import {
   useMutation,
   useQuery,
 } from "convex/react";
-import { api } from "../convex/_generated/api";
+// Use our type-safe API instead of anyApi
+import { api } from "../convex/wrapGeneratedApi";
 import Link from "next/link";
 import { SignUpButton } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
