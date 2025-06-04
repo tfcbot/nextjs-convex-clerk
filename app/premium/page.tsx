@@ -3,10 +3,18 @@ import Link from 'next/link';
 import PremiumContent from '@/components/PremiumContent';
 
 export default async function PremiumPage() {
-  // Server-side check using has()
-  const { has } = await auth();
-  const hasPremiumAccess = has({ feature: 'premium_access' });
-  const hasPremiumPlan = has({ plan: 'premium' });
+  // Server-side check using has() with error handling
+  let hasPremiumAccess = false;
+  let hasPremiumPlan = false;
+  
+  try {
+    const { has } = await auth();
+    hasPremiumAccess = has({ feature: 'premium_access' });
+    hasPremiumPlan = has({ plan: 'premium' });
+  } catch (error) {
+    console.error('Authentication error:', error);
+    // Continue with default values (false) for graceful degradation
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6">

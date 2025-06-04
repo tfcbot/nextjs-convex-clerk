@@ -21,8 +21,17 @@ export const listNumbers = query({
       // Ordered by _creationTime, return most recent
       .order("desc")
       .take(args.count);
+    let viewerName = null;
+    try {
+      const identity = await ctx.auth.getUserIdentity();
+      viewerName = identity?.name ?? null;
+    } catch (error) {
+      console.error('Error retrieving user identity:', error);
+      // Continue with null viewer name for graceful degradation
+    }
+    
     return {
-      viewer: (await ctx.auth.getUserIdentity())?.name ?? null,
+      viewer: viewerName,
       numbers: numbers.reverse().map((number) => number.value),
     };
   },
