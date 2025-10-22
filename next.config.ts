@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://*.flowslash.dev https://flowslash.dev https://app.flowslash.dev",
+            value: "frame-ancestors 'self' https://flowslash.com http://localhost:3000",
           },
           {
             key: 'Cross-Origin-Embedder-Policy',
