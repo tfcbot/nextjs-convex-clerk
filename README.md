@@ -76,42 +76,34 @@ npm run dev
 
 ## Iframe Authentication
 
-This template includes **industry-standard popup OAuth flow** for iframe/sandbox environments:
+This template includes **targeted user data mocking** for iframe/sandbox environments:
 
-### 🔧 **Automatic Detection**
+### 🔧 **Automatic Demo Mode**
 ```typescript
-import { IframeAwareAuth } from '@/components/IframeAwareAuth';
-
-// Automatically handles both standard and iframe auth
-<IframeAwareAuth>
-  <YourAuthenticatedContent />
-</IframeAwareAuth>
-```
-
-### 🎯 **Manual Control**
-```typescript
-import { usePopupAuth, isInIframe } from '@/lib/popup-auth';
+// Zero configuration - automatically works in iframes
+import { useAuth, UserButton, SignInButton } from '@clerk/nextjs';
 
 function MyComponent() {
-  const auth = usePopupAuth();
+  const { user, isSignedIn } = useAuth();
+  // In iframe: user = demo user, isSignedIn = true
+  // Direct access: user = real user, isSignedIn = actual state
   
-  const handleSignIn = async () => {
-    if (isInIframe()) {
-      await auth.signIn(); // Opens popup OAuth
-    } else {
-      // Standard Clerk flow
-    }
-  };
+  return <UserButton />; // Real Clerk component works everywhere
 }
 ```
 
-### 📚 **Full Documentation**
-See [`docs/POPUP_OAUTH_FLOW.md`](docs/POPUP_OAUTH_FLOW.md) for complete implementation details.
+### 🎭 **Real Components, Mock Data**
+- ✅ **Real Clerk components** - Authentic UI and behavior
+- ✅ **Mock user data** - Demo user automatically provided in iframes
+- ✅ **All features work** - Sign in, sign out, permissions, etc.
+- ✅ **Visual indicator** - Shows demo mode when active
 
 ### 🧪 **Test in Iframe**
 ```html
 <iframe src="http://localhost:3000" width="800" height="600"></iframe>
 ```
+
+Demo user appears automatically with full functionality!
 
 ## Project Structure
 
@@ -125,9 +117,8 @@ See [`docs/POPUP_OAUTH_FLOW.md`](docs/POPUP_OAUTH_FLOW.md) for complete implemen
 │   ├── pricing/            # Pricing page
 │   └── server/             # Server component example
 ├── components/             # React components
-│   ├── ConvexClientProvider.tsx     # Convex client setup
-│   ├── ConditionalClerkProvider.tsx # Enhanced Clerk provider with iframe support
-│   ├── IframeAwareAuth.tsx          # Context-aware auth component
+│   ├── ConvexClientProvider.tsx     # Convex client setup with mock-aware auth
+│   ├── ConditionalClerkProvider.tsx # Clerk provider with iframe detection
 │   ├── Navigation.tsx               # Navigation bar
 │   └── PremiumContent.tsx           # Protected content component
 ├── convex/                 # Convex backend
@@ -136,9 +127,8 @@ See [`docs/POPUP_OAUTH_FLOW.md`](docs/POPUP_OAUTH_FLOW.md) for complete implemen
 │   ├── myFunctions.ts      # Example Convex functions
 │   └── schema.ts           # Database schema
 ├── lib/                    # Utility libraries
-│   └── popup-auth.ts       # Popup OAuth flow utilities
-├── docs/                   # Documentation
-│   └── POPUP_OAUTH_FLOW.md # Iframe authentication guide
+│   ├── iframe-detection.ts # Context detection utilities
+│   └── mock-user-provider.tsx # Targeted user data mocking
 ├── public/                 # Static assets
 └── middleware.ts           # Next.js middleware for auth protection
 ```

@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 import { ConvexReactClient } from "convex/react";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
-import { useAuth } from "@clerk/nextjs";
+import { useMockAwareAuth } from "@/lib/mock-user-provider";
 import ConditionalClerkProvider from "./ConditionalClerkProvider";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -15,7 +15,7 @@ export default function ConvexClientProvider({
 }) {
   return (
     <ConditionalClerkProvider>
-      <ConvexProviderWithClerk client={convex} useAuth={useAuth}>
+      <ConvexProviderWithClerk client={convex} useAuth={useMockAwareAuth}>
         {children}
       </ConvexProviderWithClerk>
     </ConditionalClerkProvider>
