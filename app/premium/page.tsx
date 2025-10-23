@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Protect } from '@clerk/nextjs';
 import { Authenticated, Unauthenticated } from 'convex/react';
 import { isInIframe } from '@/lib/iframe-detection';
+import { DemoFeatureBanner, DemoFeaturePrompt, DemoSuccessState } from '@/components/DemoModeFeatures';
 
 export default function PremiumPage() {
   const isDemo = isInIframe();
@@ -13,29 +14,35 @@ export default function PremiumPage() {
       <h1 className="text-3xl font-bold mb-8">Premium Content</h1>
       
       <Authenticated>
-        <div className="space-y-8">
-          {/* Mock premium access for demo mode */}
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">
-              {isDemo ? 'Demo Premium Content' : 'Server-side Protected Content'}
-            </h2>
-            
-            <div className="prose">
-              <p>This content demonstrates premium feature access.</p>
-              {isDemo ? (
-                <>
-                  <p>In <strong>demo mode</strong>, all premium features are accessible for demonstration.</p>
-                  <div className="bg-blue-50 border border-blue-200 rounded-md p-4 mt-4">
-                    <p className="text-blue-800 text-sm">
-                      🔍 <strong>Demo Mode:</strong> Visit the full app to experience real premium feature controls and billing.
-                    </p>
+        <DemoFeatureBanner feature="Premium Features">
+          <div className="space-y-8">
+            {/* Mock premium access for demo mode */}
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <h2 className="text-xl font-semibold mb-4">
+                Advanced Analytics Dashboard
+              </h2>
+              
+              <DemoFeaturePrompt
+                feature="Analytics Dashboard"
+                description="View detailed insights about your data, user engagement, and performance metrics. Sign up to track real analytics."
+                className="h-64"
+              >
+                <div className="h-64 bg-gradient-to-br from-blue-50 to-purple-50 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="text-4xl mb-2">📊</div>
+                    <div className="text-gray-600">Interactive Charts & Metrics</div>
                   </div>
-                </>
-              ) : (
-                <p>You can see this content because you have the <strong>premium_access</strong> feature.</p>
+                </div>
+              </DemoFeaturePrompt>
+              
+              {isDemo && (
+                <DemoSuccessState 
+                  message="Analytics data loaded successfully!"
+                  icon="📈"
+                  onTryReal={() => window.open(window.location.origin, '_blank')}
+                />
               )}
             </div>
-          </div>
 
           {/* Client-side protected content using the Protect component */}
           <div className="bg-white p-6 rounded-lg shadow-md">
@@ -68,34 +75,42 @@ export default function PremiumPage() {
 
           {/* Plan-based protection example */}
           <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-semibold mb-4">Premium Plan Features</h2>
+            <h2 className="text-xl font-semibold mb-4">AI-Powered Features</h2>
             
-            <Protect 
-              plan="premium"
-              fallback={
-                <div className="bg-gray-100 p-4 rounded-md">
-                  <p className="text-gray-700">This content is only visible to premium plan subscribers.</p>
-                  <Link 
-                    href="/pricing" 
-                    className="mt-2 inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Upgrade to Premium
-                  </Link>
-                </div>
-              }
+            <DemoFeaturePrompt
+              feature="AI Assistant"
+              description="Get personalized recommendations and automated insights. Unlock AI features with a premium account."
+              className="h-48"
             >
-              <div className="prose">
-                <p>This content is protected using plan-based access control.</p>
-                <p>You are subscribed to the <strong>premium</strong> plan!</p>
-                {isDemo && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-md p-3 mt-3">
-                    <p className="text-purple-800 text-sm">💎 Demo: Premium plan simulation active</p>
-                  </div>
-                )}
+              <div className="h-48 bg-gradient-to-r from-purple-100 to-pink-100 rounded-lg p-6 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🤖</div>
+                  <div className="font-medium text-gray-800 mb-2">AI Assistant</div>
+                  <div className="text-sm text-gray-600">Intelligent automation & insights</div>
+                </div>
               </div>
-            </Protect>
+            </DemoFeaturePrompt>
           </div>
-        </div>
+
+          {/* File Upload Example */}
+          <div className="bg-white p-6 rounded-lg shadow-md">
+            <h2 className="text-xl font-semibold mb-4">File Upload & Storage</h2>
+            
+            <DemoFeaturePrompt
+              feature="Cloud Storage"
+              description="Upload and manage your files with premium storage. Get 10GB free storage when you sign up."
+              className="h-32"
+            >
+              <div className="h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">📁</div>
+                  <div className="text-gray-600">Drag & drop files here</div>
+                </div>
+              </div>
+            </DemoFeaturePrompt>
+          </div>
+          </div>
+        </DemoFeatureBanner>
       </Authenticated>
       
       <Unauthenticated>

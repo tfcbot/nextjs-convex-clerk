@@ -4,45 +4,88 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { isInIframe } from './iframe-detection';
 
-// Mock user data - only user information, not system-wide mocking
-const MOCK_USER = {
-  id: 'demo_user_123',
-  firstName: 'Demo',
-  lastName: 'User',
-  fullName: 'Demo User',
-  emailAddresses: [
-    { 
-      emailAddress: 'demo@example.com',
-      id: 'email_123',
-      verification: { status: 'verified' }
-    }
-  ],
-  primaryEmailAddress: { 
-    emailAddress: 'demo@example.com',
-    id: 'email_123'
+// Enhanced mock user data for rich demo experience
+const DEMO_USERS = [
+  {
+    id: 'demo_user_123',
+    firstName: 'Alex',
+    lastName: 'Developer',
+    fullName: 'Alex Developer',
+    emailAddresses: [
+      { 
+        emailAddress: 'alex.developer@demo.com',
+        id: 'email_123',
+        verification: { status: 'verified' }
+      }
+    ],
+    primaryEmailAddress: { 
+      emailAddress: 'alex.developer@demo.com',
+      id: 'email_123'
+    },
+    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
+    profileImageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
+    hasImage: true,
+    username: 'alexdev',
+    phoneNumbers: [],
+    web3Wallets: [],
+    externalAccounts: [],
+    samlAccounts: [],
+    organizationMemberships: [],
+    passwordEnabled: true,
+    totpEnabled: false,
+    twoFactorEnabled: false,
+    backupCodeEnabled: false,
+    publicMetadata: { role: 'developer', plan: 'premium' },
+    privateMetadata: {},
+    unsafeMetadata: {},
+    lastSignInAt: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 30), // 30 days ago
+    updatedAt: new Date(),
+    banned: false,
+    locked: false,
   },
-  imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
-  profileImageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
-  hasImage: true,
-  username: null,
-  phoneNumbers: [],
-  web3Wallets: [],
-  externalAccounts: [],
-  samlAccounts: [],
-  organizationMemberships: [],
-  passwordEnabled: true,
-  totpEnabled: false,
-  twoFactorEnabled: false,
-  backupCodeEnabled: false,
-  publicMetadata: {},
-  privateMetadata: {},
-  unsafeMetadata: {},
-  lastSignInAt: new Date(),
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  banned: false,
-  locked: false,
-};
+  {
+    id: 'demo_user_456',
+    firstName: 'Jordan',
+    lastName: 'Designer',
+    fullName: 'Jordan Designer',
+    emailAddresses: [
+      { 
+        emailAddress: 'jordan.designer@demo.com',
+        id: 'email_456',
+        verification: { status: 'verified' }
+      }
+    ],
+    primaryEmailAddress: { 
+      emailAddress: 'jordan.designer@demo.com',
+      id: 'email_456'
+    },
+    imageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
+    profileImageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=32&h=32&fit=crop&crop=face&auto=format&q=75',
+    hasImage: true,
+    username: 'jordanux',
+    phoneNumbers: [],
+    web3Wallets: [],
+    externalAccounts: [],
+    samlAccounts: [],
+    organizationMemberships: [],
+    passwordEnabled: true,
+    totpEnabled: false,
+    twoFactorEnabled: false,
+    backupCodeEnabled: false,
+    publicMetadata: { role: 'designer', plan: 'basic' },
+    privateMetadata: {},
+    unsafeMetadata: {},
+    lastSignInAt: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 60), // 60 days ago
+    updatedAt: new Date(),
+    banned: false,
+    locked: false,
+  }
+];
+
+// Select a random demo user for variety
+const MOCK_USER = DEMO_USERS[Math.floor(Math.random() * DEMO_USERS.length)];
 
 const MOCK_SESSION = {
   id: 'sess_demo_123',
@@ -98,64 +141,110 @@ export function MockUserProvider({ children }: MockUserProviderProps) {
  * Hook that overrides useAuth with mock data in iframe contexts
  */
 export function useMockAwareAuth() {
-  const realAuth = useAuth();
-  const { mockUser, mockSession, isDemo } = useContext(MockUserContext);
-
-  if (!isDemo) {
-    return realAuth;
+  // Don't even call useAuth in demo mode - prevents Clerk initialization
+  const { isDemo } = useContext(MockUserContext);
+  
+  let realAuth = null;
+  try {
+    // Only try to get real auth in production mode
+    if (!isDemo) {
+      const { useAuth } = require('@clerk/nextjs');
+      realAuth = useAuth();
+    }
+  } catch (e) {
+    // useAuth not available (normal in demo mode)
   }
 
-  // Override with mock data while preserving real auth methods
+  const { mockUser, mockSession } = useContext(MockUserContext);
+
+  if (isDemo || !realAuth) {
+    // Override with mock data - no Clerk calls
+    return {
+      isSignedIn: true,
+      isLoaded: true,
+      user: mockUser,
+      session: mockSession,
+      actor: null,
+      userId: mockUser?.id || null,
+      sessionId: mockSession?.id || null,
+      orgId: null,
+      orgRole: null,
+      orgSlug: null,
+      has: () => true, // Grant all permissions in demo mode
+      signOut: async () => {}, // No-op in demo
+      getToken: async () => `mock_jwt_token_${Date.now()}`, // Mock token
+    };
+  }
+
+  // Production mode - use real auth
   return {
     ...realAuth,
-    isSignedIn: true,
-    isLoaded: true,
-    user: mockUser,
-    session: mockSession,
-    actor: null,
-    userId: mockUser?.id || null,
-    sessionId: mockSession?.id || null,
-    orgId: null,
-    orgRole: null,
-    orgSlug: null,
-    has: () => true, // Grant all permissions in demo mode
-    // Preserve real methods for actual functionality
-    signOut: realAuth.signOut,
-    getToken: async () => `mock_jwt_token_${Date.now()}`,
   };
 }
 
 /**
- * Hook that overrides useUser with mock data in iframe contexts
+ * Hook that overrides useUser with mock data in demo contexts
  */
 export function useMockAwareUser() {
-  const realUser = useUser();
-  const { mockUser, isDemo } = useContext(MockUserContext);
-
-  if (!isDemo) {
-    return realUser;
+  const { isDemo } = useContext(MockUserContext);
+  
+  let realUser = null;
+  try {
+    // Only try to get real user in production mode
+    if (!isDemo) {
+      const { useUser } = require('@clerk/nextjs');
+      realUser = useUser();
+    }
+  } catch (e) {
+    // useUser not available (normal in demo mode)
   }
 
-  // Override with mock data
-  return {
-    isSignedIn: true,
-    isLoaded: true,
-    user: mockUser,
-  };
+  const { mockUser } = useContext(MockUserContext);
+
+  if (isDemo || !realUser) {
+    // Override with mock data
+    return {
+      isSignedIn: true,
+      isLoaded: true,
+      user: mockUser,
+    };
+  }
+
+  return realUser;
 }
 
 /**
- * Visual indicator when app is running in demo mode
+ * Enhanced demo mode indicator with call-to-action
  */
 function DemoModeIndicator() {
+  const openFullApp = () => {
+    window.open(window.location.origin, '_blank');
+  };
+
   return (
-    <div className="fixed bottom-4 right-4 bg-blue-100 border border-blue-300 text-blue-800 px-3 py-2 rounded-lg shadow-lg text-xs font-medium z-50 max-w-sm">
-      <div className="flex items-center space-x-2">
-        <span className="text-base">🔍</span>
-        <div>
-          <div className="font-semibold">Demo Mode Active</div>
-          <div className="text-blue-600">Real user data available at direct URL</div>
+    <div className="fixed bottom-4 right-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium z-50 max-w-sm border border-white/20">
+      <div className="flex items-start space-x-3">
+        <span className="text-lg">✨</span>
+        <div className="flex-1">
+          <div className="font-semibold mb-1">Preview Mode</div>
+          <div className="text-blue-100 text-xs mb-3">
+            You're viewing a demo with sample data.
+          </div>
+          <button
+            onClick={openFullApp}
+            className="w-full bg-white/20 hover:bg-white/30 text-white text-xs font-medium py-2 px-3 rounded-md transition-colors duration-200 backdrop-blur-sm"
+          >
+            Open Full App →
+          </button>
         </div>
+        <button 
+          className="text-white/60 hover:text-white/80 text-xs leading-none"
+          onClick={(e) => {
+            (e.target as HTMLElement).closest('.fixed')?.remove();
+          }}
+        >
+          ×
+        </button>
       </div>
     </div>
   );
