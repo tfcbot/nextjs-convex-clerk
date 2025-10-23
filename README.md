@@ -10,11 +10,13 @@ This is a modern full-stack application template built with:
 ## Features
 
 - **Authentication & User Management**: Complete authentication flow with Clerk, including sign-up, sign-in, and user profiles
+- **🔒 Iframe Authentication**: Industry-standard popup OAuth flow for iframe/sandbox environments (like CodeSandbox, Replit)
 - **Real-time Database**: Convex provides a real-time database with automatic syncing
 - **Server Functions**: Write your backend logic in TypeScript with Convex functions
 - **Premium Content Access**: Example implementation of premium/protected content with Clerk's permission system
 - **Responsive Design**: Mobile-friendly UI built with Tailwind CSS
 - **TypeScript**: Full type safety across the entire stack
+- **🌐 Context-Aware Auth**: Automatically detects iframe context and uses appropriate authentication flow
 
 ## Pages & Components
 
@@ -72,6 +74,45 @@ npm run dev
 4. Add the Issuer URL as `CLERK_JWT_ISSUER_DOMAIN` in your Convex deployment environment variables
 5. Uncomment the Clerk provider in `convex/auth.config.ts`
 
+## Iframe Authentication
+
+This template includes **industry-standard popup OAuth flow** for iframe/sandbox environments:
+
+### 🔧 **Automatic Detection**
+```typescript
+import { IframeAwareAuth } from '@/components/IframeAwareAuth';
+
+// Automatically handles both standard and iframe auth
+<IframeAwareAuth>
+  <YourAuthenticatedContent />
+</IframeAwareAuth>
+```
+
+### 🎯 **Manual Control**
+```typescript
+import { usePopupAuth, isInIframe } from '@/lib/popup-auth';
+
+function MyComponent() {
+  const auth = usePopupAuth();
+  
+  const handleSignIn = async () => {
+    if (isInIframe()) {
+      await auth.signIn(); // Opens popup OAuth
+    } else {
+      // Standard Clerk flow
+    }
+  };
+}
+```
+
+### 📚 **Full Documentation**
+See [`docs/POPUP_OAUTH_FLOW.md`](docs/POPUP_OAUTH_FLOW.md) for complete implementation details.
+
+### 🧪 **Test in Iframe**
+```html
+<iframe src="http://localhost:3000" width="800" height="600"></iframe>
+```
+
 ## Project Structure
 
 ```
@@ -84,14 +125,20 @@ npm run dev
 │   ├── pricing/            # Pricing page
 │   └── server/             # Server component example
 ├── components/             # React components
-│   ├── ConvexClientProvider.tsx  # Convex client setup
-│   ├── Navigation.tsx      # Navigation bar
-│   └── PremiumContent.tsx  # Protected content component
+│   ├── ConvexClientProvider.tsx     # Convex client setup
+│   ├── ConditionalClerkProvider.tsx # Enhanced Clerk provider with iframe support
+│   ├── IframeAwareAuth.tsx          # Context-aware auth component
+│   ├── Navigation.tsx               # Navigation bar
+│   └── PremiumContent.tsx           # Protected content component
 ├── convex/                 # Convex backend
 │   ├── _generated/         # Generated Convex API
 │   ├── auth.config.ts      # Authentication configuration
 │   ├── myFunctions.ts      # Example Convex functions
 │   └── schema.ts           # Database schema
+├── lib/                    # Utility libraries
+│   └── popup-auth.ts       # Popup OAuth flow utilities
+├── docs/                   # Documentation
+│   └── POPUP_OAUTH_FLOW.md # Iframe authentication guide
 ├── public/                 # Static assets
 └── middleware.ts           # Next.js middleware for auth protection
 ```
