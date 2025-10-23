@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, SignedIn, SignedOut } from '@clerk/nextjs';
+import { PopupAuthButtons } from './PopupAuth';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -47,8 +48,20 @@ export default function Navigation() {
           </Link>
         </nav>
 
-        <div className="flex items-center">
-          <UserButton afterSignOutUrl="/" />
+        <div className="flex items-center space-x-3">
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/" 
+              appearance={{
+                elements: {
+                  userButtonAvatarBox: 'w-8 h-8',
+                }
+              }}
+            />
+          </SignedIn>
+          <SignedOut>
+            <PopupAuthButtons />
+          </SignedOut>
         </div>
       </div>
     </header>

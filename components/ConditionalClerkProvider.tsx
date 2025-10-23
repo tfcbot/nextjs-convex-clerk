@@ -3,6 +3,7 @@
 import { ReactNode } from 'react';
 import { ClerkProvider } from '@clerk/nextjs';
 import { MockUserProvider } from '@/lib/mock-user-provider';
+import { getAuthConfig } from '@/lib/auth-config';
 
 interface ConditionalClerkProviderProps {
   children: ReactNode;
@@ -17,6 +18,8 @@ export default function ConditionalClerkProvider({ children }: ConditionalClerkP
     throw new Error('Missing NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY');
   }
 
+  const authConfig = getAuthConfig();
+
   return (
     <ClerkProvider
       publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
@@ -24,17 +27,7 @@ export default function ConditionalClerkProvider({ children }: ConditionalClerkP
       signInUrl="/sign-in"
       signUpUrl="/sign-up"
       afterSignInUrl="/"
-      appearance={{
-        variables: {
-          colorPrimary: '#2563eb', // Blue theme
-        },
-        elements: {
-          // Optimize for clean display
-          card: 'shadow-lg border border-gray-200',
-          headerTitle: 'text-xl font-semibold',
-          headerSubtitle: 'text-sm text-gray-600',
-        }
-      }}
+      appearance={authConfig.appearance}
     >
       <MockUserProvider>
         {children}
